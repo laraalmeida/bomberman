@@ -7,7 +7,7 @@
 #define COMP 61 // tamanho do jogo
 #define LARG 25 //tamanho do jogo
 //Beep(5580,500);
-
+//cogigo no github
 typedef struct coordenada // coordenada xy
 {
     int x;
@@ -38,7 +38,7 @@ void imprime_infos(player jog)// imprime embaixo da tela
     printf("::::::::Vidas((%d))::::::::Bombas((%d))::::::::Pontos((%d))",jog.vidas,jog.bomba,10);
     gotoxy(jog.pos.x,jog.pos.y);
 }
-void novo_jogo()// começa um novo jogo
+void novo_jogo()// comeÃ§a um novo jogo
 {
     system("cls");
     player p1= {4,3,3,5};
@@ -51,7 +51,7 @@ void novo_jogo()// começa um novo jogo
 
     movimentacao(p1);
 }
-void opcao_menu()// le a opção de inicio
+void opcao_menu()// le a opÃ§Ã£o de inicio
 {
     char c;
     do
