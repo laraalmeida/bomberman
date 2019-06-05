@@ -38,20 +38,68 @@ void imprime_infos(player jog)// imprime embaixo da tela
     printf("::::::::Vidas((%d))::::::::Bombas((%d))::::::::Pontos((%d))",jog.vidas,jog.bomba,10);
     gotoxy(jog.pos.x,jog.pos.y);
 }
-void novo_jogo()// começa um novo jogo
+void abre_mapa(char matriz[][COMP])
 {
-    system("cls");
-    player p1= {4,3,3,5};
-    textcolor(WHITE);
-    mapa();
-    imprime_infos(p1);
-    gotoxy(4,3);
-    textcolor(RED);
-    printf("J");
+    FILE *arq;
+    char nome_arquivo[50];
+    char c;
+    int x,y;
+    int i=0,j=0;
+    arq = fopen("mapa", "r");
+    if(arq == NULL)
+    {
+        printf("Erro ao abrir arquivo %s\n", nome_arquivo);
+    }
+    else
+    {
+        while(!feof(arq))
+        {
+            c = getc(arq);
 
-    movimentacao(p1);
+            if(c != EOF)
+            {
+
+                matriz[i][j] = c;
+                j++;
+            }
+        }
+        fclose(arq);
+    }
+
 }
-void opcao_menu()// le a opção de inicio
+posi imprime_mapa(char matriz[][COMP])
+{
+    int i,j;
+    posi pos;
+    gotoxy(0,0);
+    for(i=0; i<LARG; i++)
+    {
+        for(j=0; j<COMP; j++)
+        {
+            if(matriz[i][j]=='J')
+            {
+                pos.x=i;
+                pos.y=j;
+            }
+            printf("%c",matriz[i][j]);
+        }
+    }
+    return pos;
+}
+
+void novo_jogo(char matriz[][COMP])// começa um novo jogo
+{
+    posi pos;
+    system("cls");
+    textcolor(WHITE);
+    pos=imprime_mapa(matriz);
+    player p1= {pos.x+2,pos.y,3,5};
+    imprime_infos(p1);
+    gotoxy(pos.x+1,pos.y+1);
+
+    movimentacao(p1,matriz);
+}
+void opcao_menu(char matriz[][COMP])// le a opção de inicio
 {
     char c;
     do
@@ -62,25 +110,25 @@ void opcao_menu()// le a opção de inicio
     switch(c)
     {
     case'n':
-        novo_jogo();
+        novo_jogo(matriz);
         //case'c':carregar jogo
         //case's': salvar jogo
         //case'q': terminaar jogo
     }
 }
-char menu()//imprime o menu
+char menu(char matriz[][COMP])//imprime o menu
 {
     textcolor(RED);
     char c;
     printf("                    Bomberman\n\n");
     printf("                Selecione a opcao de jogo\n\n");
     printf("     N- NOVO JOGO\n\n     C- CARREGAR JOGO\n\n     S-SALVAR JOGO\n\n     Q-SAIR DO JOGO");
-    opcao_menu();
+    opcao_menu(matriz);
 }
 player andar_cima(player jog) //andar para cima
 {
-
-    if((jog.pos.y-1)>0)
+    //printf("x=%d,y%d",jog.pos.x,jog.pos.y);
+    if(jog.pos.y-1>0)
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
@@ -152,7 +200,7 @@ player andar_direita(player jog)//andar para direita
 player bomba(player jog,int x) //plantar bomba
 {
 
-switch (x)
+    switch (x)
     {
     case 1:
         gotoxy(jog.pos.x,jog.pos.y-1);
@@ -193,7 +241,7 @@ switch (x)
         return jog;
     }
 }
-void movimentacao(player p1) //movimentar
+void movimentacao(player p1, char matriz[][COMP]) //movimentar
 {
     int x=0;
     char c;
@@ -201,6 +249,7 @@ void movimentacao(player p1) //movimentar
     {
         textcolor(WHITE);
         c = getch( );
+
         switch (c)
         {
         case 'w':
@@ -229,48 +278,16 @@ void movimentacao(player p1) //movimentar
             break;
         case 'x':
             system("cls");
-            c = menu();
+            c = menu(matriz);
         }
     }
-    while(c!='27');
+    while(c!='10');
 }
 int main()
 {
+    char matriz[LARG][COMP]= {'0'};
     _setcursortype(_NOCURSOR);
-    menu();
+    abre_mapa(matriz);
+    menu(matriz);
 
 }
-void mapa(){
-    FILE *arq;
-    char nome_arquivo[50];
-    char c, matriz[LARG][COMP];
-    int i=0,j=0;
-    arq = fopen("mapa", "r");
-    if(arq == NULL)
-    {
-        printf("Erro ao abrir arquivo %s\n", nome_arquivo);
-    }
-    else
-    {
-        while(!feof(arq))
-        {
-            c = getc(arq);
-
-            if(c != EOF)
-            {
-                matriz[i][j] = c;
-                j++;
-            }
-        }
-        fclose(arq);
-    }
-    gotoxy(0,0);
-    for(i=0; i<LARG; i++)
-    {
-        for(j=0; j<COMP; j++)
-        {
-            printf("%c",matriz[i][j]);
-        }
-    }
-  }
-
