@@ -4,17 +4,17 @@
 #include<conio.c>
 #include<conio.h>
 #include<stdlib.h>
-#define COMP 61 // tamanho do jogo
-#define LARG 25 //tamanho do jogo
+#define COL 61 // tamanho do jogo
+#define LIN 25 //tamanho do jogo
 //Beep(5580,500);
 //cogigo no github
-typedef struct coordenada // coordenada xy
+typedef struct coordenada // struct com coordenada xy
 {
     int x;
     int y;
 
 } posi;
-typedef struct jogador // jogador
+typedef struct jogador // struct jogador(posicao(xy),bombas e vidas
 {
     posi pos;
     int bomba;
@@ -31,122 +31,150 @@ player atualiza_bomba(player atualiza)//atualiza o estoque de bombas
     atualiza.bomba=atualiza.bomba-1;
     return atualiza;
 }
-void imprime_infos(player jog)// imprime embaixo da tela
+void imprime_infos(player jog)// imprime embaixo da tela as informações do jogador
 {
     textcolor(GREEN);
-    gotoxy(1,26);
-    printf("::::::::Vidas((%d))::::::::Bombas((%d))::::::::Pontos((%d))",jog.vidas,jog.bomba,10);
-    gotoxy(jog.pos.x,jog.pos.y);
+    gotoxy(1,25);
+    printf("\n::::::::Vidas((%d))::::::::Bombas((%d))::::::::Pontos((%d))",jog.vidas,jog.bomba,10);
+    gotoxy(jog.pos.x,jog.pos.y); //volta para a posição do jogador
 }
-void abre_mapa(char matriz[][COMP])
+void abre_mapa(char matriz[LIN][COL]) // abre o arquivo do mapa
 {
     FILE *arq;
-    char nome_arquivo[50];
     char c;
-    int x,y;
-    int i=0,j=0;
-    arq = fopen("mapa", "r");
-    if(arq == NULL)
+    int i,j;
+    arq = fopen("mapa2", "r");
+
+    if(arq == NULL) //testa se abriu o mapa
     {
-        printf("Erro ao abrir arquivo %s\n", nome_arquivo);
+        printf("Erro ao abrir arquivo %s\n");
     }
-    else
+    else // se abriu faz a leitura do arquivo para dentro da matriz
     {
-        while(!feof(arq))
+        for(i=0; i<LIN; i++)
         {
-            c = getc(arq);
-
-            if(c != EOF)
+            for(j=0; j<COL; j++)
             {
-
-                matriz[i][j] = c;
-                j++;
+                matriz[i][j] = getc(arq);
             }
         }
         fclose(arq);
     }
-
 }
-posi imprime_mapa(char matriz[][COMP])
+posi imprime_mapa(char matriz[LIN][COL]) // imprime o mapa
 {
     int i,j;
     posi pos;
-    gotoxy(0,0);
-    for(i=0; i<LARG; i++)
+    gotoxy(0,0);//começa no pornto 0,0 da tela
+    for(i=0; i<LIN; i++)
     {
-        for(j=0; j<COMP; j++)
+        for(j=0; j<COL; j++)
         {
             if(matriz[i][j]=='J')
             {
-                pos.x=i;
-                pos.y=j;
+                matriz[i][j]=' ';// altera a matriz onde o jogador estava para um espaço em branco
+                pos.x=j;// armazena as coordenadas do jogador
+                pos.y=i;
             }
-            printf("%c",matriz[i][j]);
+            else if(matriz[i][j]=='W')//parede indestrutível
+            {
+                textcolor(LIGHTGRAY);
+                printf("%c",219);
+
+            }
+            else if(matriz[i][j]=='D')//parede destritível
+            {
+                textcolor(DARKGRAY);
+                printf("%c",219);
+            }
+            else if (matriz[i][j]=='E')//inimigo
+            {
+                textcolor(YELLOW);
+                printf("&");
+            }
+            else if (matriz[i][j]=='B' || matriz[i][j]=='K')//caixas
+            {
+                textcolor(LIGHTCYAN);
+                printf("#");
+            }
+            else if (matriz[i][j]==' ')// espaços em brancos
+            {
+
+                printf(" ",matriz[i][j]);
+            }
+            else if (matriz[i][j]=='\n')//pula linhas
+            {
+
+                printf("\n",matriz[i][j]);
+            }
+
         }
     }
-    return pos;
+    return pos; //retorna a posição do jogador ****TEM QUE RETORNAR MAIS POSIÇÕES***
 }
-
-void novo_jogo(char matriz[][COMP])// começa um novo jogo
+void novo_jogo(char matriz[LIN][COL])// começa um novo jogo
 {
     posi pos;
-    system("cls");
-    textcolor(WHITE);
-    pos=imprime_mapa(matriz);
-    player p1= {pos.x+2,pos.y,3,5};
+    system("cls"); //apaga tudo que estava na tela
+    pos=imprime_mapa(matriz); //imprime a matriz e encontra jogador
+    player p1= {pos.x+1,pos.y+1,3,5}; //inicializa o jogador(usa+1 por causa da diferença matriz\tela);
     imprime_infos(p1);
     gotoxy(pos.x+1,pos.y+1);
-
+    textcolor(LIGHTMAGENTA);
+    printf("J");
     movimentacao(p1,matriz);
 }
-void opcao_menu(char matriz[][COMP])// le a opção de inicio
+void opcao_menu(char matriz[LIN][COL])// le a opção de inicio
 {
     char c;
     do
     {
-        c = getch();
+        c = getch(); //espera uma tecla
     }
-    while(c!='n'&&c!='c'&&c!='s'&&c!='q');
+    while(c!='n'&&c!='c'&&c!='s'&&c!='q'); //enquanto n for válida
     switch(c)
     {
     case'n':
         novo_jogo(matriz);
-        //case'c':carregar jogo
-        //case's': salvar jogo
-        //case'q': terminaar jogo
+    case'c':
+        //carregar_jogo();
+        case's':
+    //salvar_jogo();
+    case'q':
+        system("cls");
+        printf("\n\n\n=====FIM DE JOGO=====\n\n\n");
+        return 0;//***ENCONTRAR SOLUÇÃO PARA FIM DE JOGO***
     }
 }
-char menu(char matriz[][COMP])//imprime o menu
+char menu(char matriz[LIN][COL])//imprime o menu
 {
-    textcolor(RED);
+    textcolor(LIGHTCYAN);
     char c;
-    printf("                    Bomberman\n\n");
-    printf("                Selecione a opcao de jogo\n\n");
+    printf("                             Bomberman\n\n\n\n");
+    printf("                Selecione a opcao de jogo\n\n\n\n");
     printf("     N- NOVO JOGO\n\n     C- CARREGAR JOGO\n\n     S-SALVAR JOGO\n\n     Q-SAIR DO JOGO");
     opcao_menu(matriz);
 }
-player andar_cima(player jog) //andar para cima
+player andar_cima(player jog,char matriz[LIN][COL]) //andar para cima
 {
-    //printf("x=%d,y%d",jog.pos.x,jog.pos.y);
-    if(jog.pos.y-1>0)
+    if(matriz[jog.pos.y-2][jog.pos.x-1]==' ')//verifica se pode ir pra cima
     {
         gotoxy(jog.pos.x,jog.pos.y);
-        printf(" ");
+        printf(" "); //apaga onde estava
         gotoxy(jog.pos.x,jog.pos.y-1);
-        printf("J");
-        jog=atualiza(jog.pos.x,jog.pos.y-1,jog);
+        printf("J");//imprime no novo lugar
+        jog=atualiza(jog.pos.x,jog.pos.y-1,jog); //atualiza a posição do jogador
     }
-    else
+    else //se n puder, só printa no mesmo lugar
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf("J");
     }
-    return jog;
+    return jog; //retorna o jogador com a posição atualizada
 }
-player andar_baixo(player jog)//andar para baixo
+player andar_baixo(player jog,char matriz[LIN][COL])//andar para baixo
 {
-
-    if((jog.pos.y+1)<LARG)
+    if(matriz[jog.pos.y][jog.pos.x-1]==' ')
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
@@ -154,17 +182,16 @@ player andar_baixo(player jog)//andar para baixo
         printf("J");
         jog=atualiza(jog.pos.x,jog.pos.y+1,jog);
     }
-    else if ((jog.pos.y+1)>LARG || (jog.pos.y+1)=='B' || (jog.pos.y+1)=='W'|| (jog.pos.y+1)>0=='D')
+    else
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf("J");
     }
     return jog;
 }
-player andar_esquerda(player jog)//andar para esquerda
+player andar_esquerda(player jog, char matriz[LIN][COL])//andar para esquerda
 {
-
-    if((jog.pos.x-1)>0)
+    if(matriz[jog.pos.y-1][jog.pos.x-2]==' ')
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
@@ -172,17 +199,16 @@ player andar_esquerda(player jog)//andar para esquerda
         printf("J");
         jog=atualiza(jog.pos.x-1,jog.pos.y,jog);
     }
-    else if ((jog.pos.x-1)<0 || (jog.pos.x-1)=='B' || (jog.pos.x-1)=='W'|| (jog.pos.x-1)>0=='D')
+    else
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf("J");
     }
     return jog;
 }
-player andar_direita(player jog)//andar para direita
+player andar_direita(player jog, char matriz[LIN][COL])//andar para direita
 {
-
-    if((jog.pos.x+1)<COMP)
+    if(matriz[jog.pos.y-1][jog.pos.x]==' ')
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
@@ -190,104 +216,102 @@ player andar_direita(player jog)//andar para direita
         printf("J");
         jog = atualiza(jog.pos.x+1,jog.pos.y,jog);
     }
-    else if ((jog.pos.x+1)<0 || (jog.pos.x+1)=='B' || (jog.pos.x+1)=='W'|| (jog.pos.x+1)>0=='D')
+    else
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf("J");
     }
     return jog;
 }
-player bomba(player jog,int x) //plantar bomba
+player bomba(player jog,int x,char matriz[LIN][COL]) //plantar bomba
 {
-
-    switch (x)
+    switch (x) // seleciona a flag da bomba
     {
-    case 1:
-        gotoxy(jog.pos.x,jog.pos.y-1);
-        if(jog.pos.y-1>0)
+    case 1: //para cima
+        if(matriz[jog.pos.y-2][jog.pos.x-1]==' ')//verifica se pode plantar
         {
-            textcolor(YELLOW);
-            printf("#");
-            jog=atualiza_bomba(jog);
-
+            gotoxy(jog.pos.x,jog.pos.y-1);// se puder, vai para o lugar
+            textcolor(LIGHTRED);
+            printf("@");//planta a bomba
+            jog=atualiza_bomba(jog);//atualiza o estoque de bombas
         }
-        return jog;
-    case 2:
-        gotoxy(jog.pos.x,jog.pos.y+1);
-        if(jog.pos.y+1<LARG)
+        return jog; //retorna jogador atualizado
+    case 2://para baixo
+        if(matriz[jog.pos.y][jog.pos.x-1]==' ')
         {
-            textcolor(YELLOW);
-            printf("#");
-            jog=atualiza_bomba(jog);
-        }
-        return jog;
-    case 3:
-        gotoxy(jog.pos.x-1,jog.pos.y);
-        if(jog.pos.x-1>0)
-        {
-            textcolor(YELLOW);
-            printf("#");
+            gotoxy(jog.pos.x,jog.pos.y+1);
+            textcolor(LIGHTRED);
+            printf("@");
             jog=atualiza_bomba(jog);
         }
         return jog;
-    case 4:
-        gotoxy(jog.pos.x+1,jog.pos.y);
-        if(jog.pos.x+1<COMP)
+    case 3://para esquerda
+        if(matriz[jog.pos.y-1][jog.pos.x-2]==' ')
         {
-            textcolor(YELLOW);
-            printf("#");
+            gotoxy(jog.pos.x-1,jog.pos.y);
+            textcolor(LIGHTRED);
+            printf("@");
+            jog=atualiza_bomba(jog);
+        }
+        return jog;
+    case 4://para direita
+        if(matriz[jog.pos.y-1][jog.pos.x]==' ')
+        {
+            gotoxy(jog.pos.x+1,jog.pos.y);
+            textcolor(LIGHTRED);
+            printf("@");
             jog=atualiza_bomba(jog);
         }
         return jog;
     }
 }
-void movimentacao(player p1, char matriz[][COMP]) //movimentar
+void movimentacao(player p1, char matriz[LIN][COL]) //movimentar
 {
     int x=0;
     char c;
     do
     {
-        textcolor(WHITE);
-        c = getch( );
+        textcolor(LIGHTMAGENTA);
+        c = getch( );// aguarda comandos do teclado ***SETAS E ESC***
 
         switch (c)
         {
         case 'w':
-            p1 = andar_cima(p1);
+            p1 = andar_cima(p1,matriz);
             x=1;
             break;
         case 's':
-            p1 = andar_baixo(p1);
+            p1 = andar_baixo(p1,matriz);
             x=2;
             break;
         case 'a':
-            p1 = andar_esquerda(p1);
+            p1 = andar_esquerda(p1,matriz);
             x=3;
             break;
         case 'd':
-            p1 = andar_direita(p1);
+            p1 = andar_direita(p1,matriz);
             x=4;
             break;
         case 'b':
-            if(p1.bomba!=0)
+            if(p1.bomba!=0)// verifica se o estoque é != 0
             {
-                p1=bomba(p1,x);
-                gotoxy(1,26);
-                imprime_infos(p1);
+                p1=bomba(p1,x,matriz);
+                gotoxy(1,25);
+                imprime_infos(p1);//atualiza o painel de controle
             }
             break;
         case 'x':
-            system("cls");
+            system("cls");//limpa a tela e chama menu
             c = menu(matriz);
         }
     }
-    while(c!='10');
+    while(c!='x');//loop infinito
 }
 int main()
 {
-    char matriz[LARG][COMP]= {'0'};
-    _setcursortype(_NOCURSOR);
+    char matriz[LIN][COL]= {'0'};//inicializa uma matriz
+    _setcursortype(_NOCURSOR);//retira o cursor da tela
     abre_mapa(matriz);
-    menu(matriz);
-
+    menu(matriz);//chama menu de inicio
 }
+
