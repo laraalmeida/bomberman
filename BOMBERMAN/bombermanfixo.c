@@ -124,7 +124,36 @@ void novo_jogo(char matriz[LIN][COL])// começa um novo jogo
     printf("J");
     movimentacao(p1,matriz);
 }
-void opcao_menu(char matriz[LIN][COL])// le a opção de inicio
+void salvar_jogo(char matriz[LIN][COL]){
+    FILE *arq;
+    char c;
+    int i,j;
+    char nome_jogo[50];
+
+    system("cls");
+    printf("\nInsira o nome do jogo: ");
+    gets(nome_jogo);
+
+    arq = fopen(nome_jogo, "w");
+
+    if(arq == NULL) //testa se abriu o mapa
+    {
+        printf("Erro ao abrir arquivo");
+    }
+    else // se abriu faz a leitura do arquivo para dentro da matriz
+    {
+        for(i=0; i<LIN; i++)
+        {
+            for(j=0; j<COL; j++)
+            {
+                putc(matriz[i][j],arq);
+            }
+        }
+        printf("%s salvo com sucesso",nome_jogo);
+        fclose(arq);
+    }
+}
+int opcao_menu(char matriz[LIN][COL])// le a opção de inicio
 {
     char c;
     do
@@ -139,7 +168,8 @@ void opcao_menu(char matriz[LIN][COL])// le a opção de inicio
     case'c':
         //carregar_jogo();
         case's':
-    //salvar_jogo();
+        salvar_jogo(matriz);
+        break;
     case'q':
         system("cls");
         printf("\n\n\n=====FIM DE JOGO=====\n\n\n");
@@ -161,9 +191,12 @@ player andar_cima(player jog,char matriz[LIN][COL]) //andar para cima
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" "); //apaga onde estava
+        matriz[jog.pos.y-1][jog.pos.x-1]=' ';
         gotoxy(jog.pos.x,jog.pos.y-1);
         printf("J");//imprime no novo lugar
+        matriz[jog.pos.y-2][jog.pos.x-1]='J';
         jog=atualiza(jog.pos.x,jog.pos.y-1,jog); //atualiza a posição do jogador
+
     }
     else //se n puder, só printa no mesmo lugar
     {
@@ -178,9 +211,12 @@ player andar_baixo(player jog,char matriz[LIN][COL])//andar para baixo
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
+        matriz[jog.pos.y-1][jog.pos.x-1]=' ';
         gotoxy(jog.pos.x,jog.pos.y+1);
         printf("J");
+        matriz[jog.pos.y][jog.pos.x-1]='J';
         jog=atualiza(jog.pos.x,jog.pos.y+1,jog);
+
     }
     else
     {
@@ -195,9 +231,12 @@ player andar_esquerda(player jog, char matriz[LIN][COL])//andar para esquerda
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
+        matriz[jog.pos.y-1][jog.pos.x-1]=' ';
         gotoxy(jog.pos.x-1,jog.pos.y);
         printf("J");
+        matriz[jog.pos.y-1][jog.pos.x-2]='J';
         jog=atualiza(jog.pos.x-1,jog.pos.y,jog);
+
     }
     else
     {
@@ -212,9 +251,12 @@ player andar_direita(player jog, char matriz[LIN][COL])//andar para direita
     {
         gotoxy(jog.pos.x,jog.pos.y);
         printf(" ");
+        matriz[jog.pos.y-1][jog.pos.x-1]=' ';
         gotoxy(jog.pos.x+1,jog.pos.y);
         printf("J");
+        matriz[jog.pos.y-1][jog.pos.x]='J';
         jog = atualiza(jog.pos.x+1,jog.pos.y,jog);
+
     }
     else
     {
@@ -233,7 +275,9 @@ player bomba(player jog,int x,char matriz[LIN][COL]) //plantar bomba
             gotoxy(jog.pos.x,jog.pos.y-1);// se puder, vai para o lugar
             textcolor(LIGHTRED);
             printf("@");//planta a bomba
+            matriz[jog.pos.y-2][jog.pos.x-1]='@';
             jog=atualiza_bomba(jog);//atualiza o estoque de bombas
+
         }
         return jog; //retorna jogador atualizado
     case 2://para baixo
@@ -242,6 +286,7 @@ player bomba(player jog,int x,char matriz[LIN][COL]) //plantar bomba
             gotoxy(jog.pos.x,jog.pos.y+1);
             textcolor(LIGHTRED);
             printf("@");
+            matriz[jog.pos.y][jog.pos.x-1]='@';
             jog=atualiza_bomba(jog);
         }
         return jog;
@@ -251,6 +296,7 @@ player bomba(player jog,int x,char matriz[LIN][COL]) //plantar bomba
             gotoxy(jog.pos.x-1,jog.pos.y);
             textcolor(LIGHTRED);
             printf("@");
+            matriz[jog.pos.y-1][jog.pos.x-2]='@';
             jog=atualiza_bomba(jog);
         }
         return jog;
@@ -260,6 +306,7 @@ player bomba(player jog,int x,char matriz[LIN][COL]) //plantar bomba
             gotoxy(jog.pos.x+1,jog.pos.y);
             textcolor(LIGHTRED);
             printf("@");
+            matriz[jog.pos.y-1][jog.pos.x]='@';
             jog=atualiza_bomba(jog);
         }
         return jog;
@@ -314,4 +361,5 @@ int main()
     abre_mapa(matriz);
     menu(matriz);//chama menu de inicio
 }
+
 
