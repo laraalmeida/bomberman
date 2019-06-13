@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<windows.h>
 #include<time.h>
-#include<conio.c>
+#include<conio2.h>
 #include<conio.h>
 #include<stdlib.h>
 #define COL 61 // tamanho do jogo
@@ -34,7 +34,7 @@ player atualiza_bomba(player atualiza)//atualiza o estoque de bombas
 void imprime_infos(player jog)// imprime embaixo da tela as informações do jogador
 {
     textcolor(GREEN);
-    gotoxy(1,25);
+    gotoxy(1,26);
     printf("\n::::::::Vidas((%d))::::::::Bombas((%d))::::::::Pontos((%d))",jog.vidas,jog.bomba,10);
     gotoxy(jog.pos.x,jog.pos.y); //volta para a posição do jogador
 }
@@ -124,7 +124,8 @@ void novo_jogo(char matriz[LIN][COL])// começa um novo jogo
     printf("J");
     movimentacao(p1,matriz);
 }
-void salvar_jogo(char matriz[LIN][COL]){
+void salvar_jogo(char matriz[LIN][COL])
+{
     FILE *arq;
     char c;
     int i,j;
@@ -173,7 +174,7 @@ int opcao_menu(char matriz[LIN][COL])// le a opção de inicio
     case'q':
         system("cls");
         printf("\n\n\n=====FIM DE JOGO=====\n\n\n");
-        return 0;//***ENCONTRAR SOLUÇÃO PARA FIM DE JOGO***
+        break;
     }
 }
 char menu(char matriz[LIN][COL])//imprime o menu
@@ -320,44 +321,77 @@ void movimentacao(player p1, char matriz[LIN][COL]) //movimentar
     {
         textcolor(LIGHTMAGENTA);
         c = getch( );// aguarda comandos do teclado ***SETAS E ESC***
-
-        switch (c)
+        if((int)c == -32)  //se a primeira parte é -32 então pode ser uma seta
         {
-        case 'w':
-            p1 = andar_cima(p1,matriz);
-            x=1;
-            break;
-        case 's':
-            p1 = andar_baixo(p1,matriz);
-            x=2;
-            break;
-        case 'a':
-            p1 = andar_esquerda(p1,matriz);
-            x=3;
-            break;
-        case 'd':
-            p1 = andar_direita(p1,matriz);
-            x=4;
-            break;
-        case 'b':
-            if(p1.bomba!=0)// verifica se o estoque é != 0
+            c = getch(); //pega segunda parte
+            switch (c)
             {
-                p1=bomba(p1,x,matriz);
-                gotoxy(1,25);
-                imprime_infos(p1);//atualiza o painel de controle
+
+            case 72:
+                p1 = andar_cima(p1,matriz);
+                x=1;
+                break;
+            case 80:
+                p1 = andar_baixo(p1,matriz);
+                x=2;
+                break;
+            case 75:
+                p1 = andar_esquerda(p1,matriz);
+                x=3;
+                break;
+            case 77:
+                p1 = andar_direita(p1,matriz);
+                x=4;
+                break;
             }
-            break;
-        case 'x':
-            system("cls");//limpa a tela e chama menu
-            c = menu(matriz);
+        }
+        else
+        {
+
+
+            switch (c)
+            {
+            case 'w':
+                p1 = andar_cima(p1,matriz);
+                x=1;
+                break;
+            case 's':
+                p1 = andar_baixo(p1,matriz);
+                x=2;
+                break;
+            case 'a':
+                p1 = andar_esquerda(p1,matriz);
+                x=3;
+                break;
+            case 'd':
+                p1 = andar_direita(p1,matriz);
+                x=4;
+                break;
+            case 'b':
+                if(p1.bomba!=0)// verifica se o estoque é != 0
+                {
+                    p1=bomba(p1,x,matriz);
+                    gotoxy(1,25);
+                    imprime_infos(p1);//atualiza o painel de controle
+                }
+                break;
+            case 27:
+                system("cls");//limpa a tela e chama menu
+                c = menu(matriz);
+            }
         }
     }
-    while(c!='x');//loop infinito
+    while(c!=27); //loop infinito
+}
+void HideCursor()
+{
+    CONSOLE_CURSOR_INFO cursor = {1, FALSE};
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursor);
 }
 int main()
 {
     char matriz[LIN][COL]= {'0'};//inicializa uma matriz
-    _setcursortype(_NOCURSOR);//retira o cursor da tela
+    HideCursor();
     abre_mapa(matriz);
     menu(matriz);//chama menu de inicio
 }
